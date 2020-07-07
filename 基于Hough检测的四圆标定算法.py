@@ -44,7 +44,7 @@ for i,circle in enumerate(circles[0]):  #遍历求圆心二值化后灰度均值
    
 
 circle_gray_average = circle_gray_num / len(circles[0])
-print("circle_gray_average="+str(circle_gray_average))
+#print("circle_gray_average="+str(circle_gray_average))
 
 for i,circle in enumerate(circles[0]):  #遍历去除多余的圆并标出
     #坐标行列(就是圆心)1
@@ -68,7 +68,7 @@ if len(circles[0]<=11):
     rectangle_xy_new=np.delete(circles[0],[len(circles[0]),11],0)
 
 
-print(rectangle_xy_new)
+#print(rectangle_xy_new)
 #寻找矩形对顶点
 max_x=0
 max_y=0
@@ -83,6 +83,17 @@ for i,xy in enumerate(rectangle_xy_new):
         max_y=rectangle_xy_new[i][1]
     if rectangle_xy_new[i][1]<min_y:
         min_y=rectangle_xy_new[i][1]
+
+ret = np.array([[[0,0]]],order='F')
+for i,xy in enumerate(rectangle_xy_new):
+    ret = np.append(ret,[[[rectangle_xy_new[i][0],rectangle_xy_new[i][1]]]],axis=0)
+
+ret = np.delete(ret,0,axis=0)
+print(ret)
+
+
+
+
 
 img=cv2.rectangle(img,(int(min_x),int(min_y)),(int(max_x),int(max_y)),(0,0,255))
 cut_img = img[int(min_y):int(max_y),int(min_x):int(max_x)]
