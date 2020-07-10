@@ -89,7 +89,7 @@ def scan_image(image):
 
     cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
     #cv2.imshow("Outline", image)
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
     cv2.destroyAllWindows()
 
     # 透视变换
@@ -103,10 +103,3 @@ def scan_image(image):
 
 #cv2.imshow("Original", resize(orig, height = 650))
 #cv2.imshow("Scanned", resize(ref, height = 650))
-
-image = cv2.imread(r"C:\Users\Owen\Pictures\page.jpg")
-scan_img = scan_image(image)
-
-cv2.imshow('scan_img',scan_img)
-
-cv2.waitKey(0)
