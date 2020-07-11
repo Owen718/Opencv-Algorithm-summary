@@ -62,11 +62,12 @@ class Ui_Widget(object):
         self.rwidget = QtWidgets.QWidget()
         self.rwidget.setLayout(self.rlayout)
 
-
+        self.textEdit = QtWidgets.QTextEdit()
 
     
         self.alllayout = QtWidgets.QHBoxLayout()
         self.alllayout.addWidget(self.lwidget)
+        self.alllayout.addWidget(self.textEdit)
         self.alllayout.addWidget(self.rwidget)
 
         Widget.setLayout(self.alllayout)

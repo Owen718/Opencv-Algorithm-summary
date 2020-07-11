@@ -1,4 +1,4 @@
-#import credit_card
+
 import sys
 from credit_card_ui import Ui_Widget
 from PyQt5.QtWidgets import QApplication,QMessageBox

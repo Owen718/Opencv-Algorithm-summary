@@ -56,10 +56,10 @@ def resize(image,width = None , height = None,inter = cv2.INTER_AREA):
 
 #image = cv2.imread(r"C:\Users\Owen\Pictures\page.jpg")
 def scan_image(image):
-    ratio = image.shape[0] / 500.0
+    ratio = image.shape[0] / 1000.0
     orig = image.copy()
 
-    image = resize(orig,height = 500)
+    image = resize(orig,height = 1000)
 
 
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)   #灰度图
@@ -97,9 +97,11 @@ def scan_image(image):
 
     # 二值处理
     warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-    ref = cv2.threshold(warped, 100, 255, cv2.THRESH_BINARY)[1]
-    return resize(ref,height = 650)
+    ref = cv2.threshold(warped, 150, 255, cv2.THRESH_BINARY)[1]
+
+    return resize(ref,height = 1000)
 
 
 #cv2.imshow("Original", resize(orig, height = 650))
 #cv2.imshow("Scanned", resize(ref, height = 650))
+
