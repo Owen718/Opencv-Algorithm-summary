@@ -21,3 +21,5 @@ print( "Total Keypoints without nonmaxSuppression: {}".format(len(kp)) )
 img3 = cv2.drawKeypoints(img, kp, None, color=(255,0,0))
 cv2.imshow('fast_false',img3)
 cv2.waitKey()
+
+print(type(img))
