@@ -9,7 +9,7 @@ def cv_show(name,img):
     cv2.destroyAllWindows()
 
 def mat_mean(img,θ,N):  #计算各通道均值，根据θ来判断返回R通道最大值或平均值,目前暂定N为3
-    global original
+    global original_img
     mean_kernel = np.array([
         [1/9,1/9,1/9],
         [1/9,1/9,1/9],
@@ -28,46 +28,47 @@ def mat_mean(img,θ,N):  #计算各通道均值，根据θ来判断返回R通道
     row,col = R.shape  #row是行，col是列
     max_num  = 0
     mean_num = 0
-    original_view = original.copy()
-    R_mean = np.zeros((row,col),dtype = np.uint8)
-    for x in range(row-3):  #遍历行
-        for y in range(col-3):  #遍历列
-            xy_zone = R[x:x+3,y:y+3] 
-            if xy_zone.max() > θ*255:  #若是最大值大于θ
-                for i in range(xy_zone.shape[0]):
-                    for j in range(xy_zone.shape[1]):
-                        if xy_zone[i,j]<θ*255:
-                           xy_zone[i,j]=θ*255
-                           
-                            
-                R_mid_mean=cv2.boxFilter(xy_zone,ddepth=-1,ksize=(N,N),anchor=(-1,-1),normalize=True)
-                R_mean[x,y]=np.mean(R_mid_mean)
+    original_view = original_img.copy()
+    R_mean = np.zeros((row,col),dtype = np.float64)
+    for x in range(row-N):  #遍历行
+        for y in range(col-N):  #遍历列
+            xy_zone = R[x:x+N,y:y+N] 
+            if xy_zone.max() > θ:  #若是最大值大于θ
+               ## for i in range(xy_zone.shape[0]):
+                   # for j in range(xy_zone.shape[1]):
+                   #     if xy_zone[i,j]<θ:
+                    #       xy_zone[i,j]=θ
+                #if  np.mean(xy_zone) < θ:
+                #    R_mean[x,y]=θ
+                #else:
+                #R_mean[x,y]=np.mean(xy_zone)
                 #R_mean[x:x+3,y:y+3]=cv2.boxFilter(xy_zone,ddepth=-1,ksize=(N,N),anchor=None,normalize=False)
                 #max_num +=1
+                R_mean[x,y]=xy_zone.max()
                 mean_num += 1
             else:  #若是最大值小于θ
                 #R_mean[x,y]=np.mean(xy_zone)  #取均值
                 #R_mean[x:x+3,y:y+3]=cv2.boxFilter(xy_zone,ddepth=-1,ksize=(N,N),normalize=False)
                 #mean_num += 1
                 max_num += 1
-                R_mean[x,y]=xy_zone.max()
-                original_view = cv2.circle(original_view,center=(y,x),radius = 1,color = (255,255,255))#绘制区域
-        
+                R_mean[x,y]=np.mean(xy_zone)
+                #original_view = cv2.circle(original_view,center=(y,x),radius = 1,color = (255,255,255))#绘制区域
+                original_view[x,y,:] = [0,0,255]
                 
     cv_show('original_view',original_view)
     print('max_num:'+str(max_num))
     print('mean_num:'+str(mean_num))       
 
-    for x in range(row-3,row):  #复制图像边缘
+    for x in range(row-N,row):  #复制图像边缘
         for y in range(col):
             R_mean[x,y] = R[x,y]
 
     for x in range(row):  #复制图像边缘
-        for y in range(col-3,col):
+        for y in range(col-N,col):
             R_mean[x,y] = R[x,y]
 
 
-    return B_mean.astype(np.uint8),G_mean.astype(np.uint8),R_mean.astype(np.uint8)
+    return B_mean.astype(np.float64),G_mean.astype(np.float64),R_mean.astype(np.float64)
 
 
 
@@ -124,14 +125,75 @@ def zero_to_one(HCF):  #可能出现0的情况，无法作为除数，将0替换
                 HCF[x,y]=1
     return HCF
 
+#求暗通道：
+def getDarkChannel(img, blockSize):
+    # 输入检查
+    if len(img.shape) == 2:
+        pass
+    else:
+        print("bad image shape, input image must be two demensions")
+        return None
+
+    # blockSize检查
+    if blockSize % 2 == 0 or blockSize < 3:
+        print('blockSize is not odd or too small')
+        return None
+    # print('blockSize', blockSize)
+    # 计算addSize
+    addSize = int((blockSize - 1) / 2)
+    newHeight = img.shape[0] + blockSize - 1
+    newWidth = img.shape[1] + blockSize - 1
+
+    # 中间结果
+    imgMiddle = np.zeros((newHeight, newWidth))
+    imgMiddle[:, :] = 255
+    # print('imgMiddle',imgMiddle)
+    # print('type(newHeight)',type(newHeight))
+    # print('type(addSize)',type(addSize))
+    imgMiddle[addSize:newHeight - addSize, addSize:newWidth - addSize] = img
+    # print('imgMiddle', imgMiddle)
+    imgDark = np.zeros((img.shape[0], img.shape[1]), np.uint8)
+    localMin = 255
+
+    for i in range(addSize, newHeight - addSize):
+        for j in range(addSize, newWidth - addSize):
+            localMin = 255
+            for k in range(i - addSize, i + addSize + 1):
+                for l in range(j - addSize, j + addSize + 1):
+                    if imgMiddle.item((k, l)) < localMin:
+                        localMin = imgMiddle.item((k, l))
+            imgDark[i - addSize, j - addSize] = localMin
+
+    return imgDark
+
+
+# 获取最小值矩阵
+# 获取BGR三个通道的最小值
+def getMinChannel(img):
+    # 输入检查
+    if len(img.shape) == 3 and img.shape[2] == 3:
+        pass
+    else:
+        print("bad image shape, input must be color image")
+        return None
+    imgGray = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+    localMin = 255
+
+    for i in range(0, img.shape[0]):
+        for j in range(0, img.shape[1]):
+            localMin = 255
+            for k in range(0, 3):
+                if img.item((i, j, k)) < localMin:
+                    localMin = img.item((i, j, k))
+            imgGray[i, j] = localMin
+    return imgGray
 
 
 
-
-θ = 0.3 #θ is a parameter controlling the selection of the bright parts in the red channel.
+θ = 0.2 #θ is a parameter controlling the selection of the bright parts in the red channel.
 σ = 0.3  #σ is a parameter of a two-dimensional Gaussian function 
 k = 0.5  #k值暂定
-N = 9  #N*N的大小
+N = 15 #N*N的大小
 
 img = cv2.imread(r'C:\Users\Owen\Pictures\HCF-test.jpg')
 #cv_show('original',img)
@@ -139,6 +201,7 @@ img = cv2.imread(r'C:\Users\Owen\Pictures\HCF-test.jpg')
 
 
 original = img.copy()
+original_img = original.copy()
 
 B,G,R =cv2.split(original)#拆分图像通道
 L = (B+G+R) / 3  #求均值
@@ -146,17 +209,28 @@ L = (B+G+R) / 3  #求均值
 
 RGB_merge('original',B,G,R)
 
-HCFB,HCFG,HCFR = mat_mean(original,θ,N) #各通道均值
+original = np.float64(original)
+L1_normalized = cv2.normalize(original,dst = None,alpha = 0,beta = 1 , norm_type = cv2.NORM_MINMAX)  #归一化
+
+HCFB,HCFG,HCFR = mat_mean(L1_normalized,θ,N) #各通道均值
+
 HCFL = L_mean(L,N)  #L均值
 
-RGB_merge('HCF IMG',HCFB,HCFG,HCFR)
+HCF = cv2.merge([HCFB,HCFG,HCFR])
+
+HCF = HCF * 255
+HCF = np.uint8(HCF)
+HCF = cv2.GaussianBlur(HCF,(N,N),σ)
+cv_show('HCF',HCF)
+
+
 print(HCFB[int(HCFB.shape[0]/2),int(HCFB.shape[1]/2)])
 
 
 #with the HC feedbacks,the cone signals become:
-CSR = R / zero_to_one(HCFR)  
-CSG = G / zero_to_one(HCFG)
-CSB = B / zero_to_one(HCFB)
+CSR = R / zero_to_one(HCF[:,:,0])  
+CSG = G / zero_to_one(HCF[:,:,1])
+CSB = B / zero_to_one(HCF[:,:,2])
 CSL = L / HCFL
 
 RGB_merge('CS IMG',CSR,CSG,CSB)

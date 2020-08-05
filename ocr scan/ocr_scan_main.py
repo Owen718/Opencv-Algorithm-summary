@@ -34,7 +34,7 @@ class Ocr_Scan(QtWidgets.QWidget,Ui_Widget):
 
         self.pushButton.clicked.connect(lambda:self.slot_btn_chooseImg())
         self.pushButton_2.clicked.connect(lambda : self.ocr_scan_deal())
-        #self.pushButton_4.clicked.connect(lambda : self.import_template())
+        #self.pushButton_4.clicked.connect(lambda : self.())
         self.pushButton_3.clicked.connect(lambda : self.save_scaned_img())
 
    
