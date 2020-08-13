@@ -10,11 +10,7 @@ def cv_show(name,img):
 
 def mat_mean(img,θ,N):  #计算各通道均值，根据θ来判断返回R通道最大值或平均值,目前暂定N为3
     global original_img
-    mean_kernel = np.array([
-        [1/9,1/9,1/9],
-        [1/9,1/9,1/9],
-        [1/9,1/9,1/9]
-    ])   #均值算子
+
     #B_mean = cv2.filter2D(img[:,:,0],ddepth=-1,kernel=mean_kernel)  #B通道卷积计算
     #G_mean = cv2.filter2D(img[:,:,1],ddepth=-1,kernel=mean_kernel)  #G通道卷积计算
 
@@ -89,13 +85,6 @@ def RGB_merge(name,B,G,R):
 def gaussian_2d_funcion(Rx,Ry):  #计算二维高斯函数值
     gaussian_sigma = 1/(2*np.pi*σ*σ) * np.exp(-(Rx*Rx + Ry*Ry)/(2*σ*σ))
     return gaussian_sigma
-
-def generate_gaussian_2d_matrix(shape):  #生成二维高斯函数矩阵
-    gaussian_2d_matrix = np.zeros(shape[0],shape[1])  #生成shape[0]行，shape[1]列的高斯滤波矩阵
-    for row in range(shape[0]):  #遍历行
-        for col in range(shape[1]):  #遍历列
-            gaussian_2d_matrix[row,col] = gaussian_2d_funcion(row,col)
-    return gaussian_2d_matrix
 
 def gamma_enhance(bgr,c,a):  #s=c*pow(r,a)  #gamma函数
     (b,g,r) = cv2.split(bgr)
