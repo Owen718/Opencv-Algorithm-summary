@@ -4,17 +4,23 @@ import cv2,os,time
 
 def show_detections(image,detections):
     h,w,c=image.shape
+    face_num = 0
     for i in range(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
         if confidence >0.6:
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
+            face_num += 1
             text = "{:.2f}%".format(confidence * 100)
             y = startY - 10 if startY - 10 > 10 else startY + 10
             cv2.rectangle(image, (startX, startY), (endX, endY),
                 (0, 255,0), 1)
             cv2.putText(image, text, (startX, y),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+    
+    face_num_str  =  'people:'  + str(face_num)
+    cv2.putText(image,face_num_str,(int(image.shape[0]/10),int(image.shape[1]/10)),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),1)
+            
     return image
  
 def detect_img(net,image):
@@ -24,7 +30,11 @@ def detect_img(net,image):
     start=time.time()
     detections = net.forward()
     end=time.time()
-    print(end-start)
+    #print(end-start)
+    fps = 1 / (end - start)   #计算fps
+   # cv2.putText(image,str(int(fps)),(int(image.shape[0]/10),int(image.shape[1]/10)),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),1)  #fps值
+   # cv2.putText(image,str(detections.shape[2]),(int(image.shape[0]/10,int(image.shape[1]/8))),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),1)
+
     return show_detections(image,detections)
  
 def test_dir(net,dir="images"):
