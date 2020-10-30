@@ -2,7 +2,11 @@
 import numpy as np
 import cv2,os,time
 
-def show_detections(image,detections):
+face_num_global = 0
+
+
+def show_detections(image,detections):   #框选人脸 、贴出人脸数目
+    global face_num_global
     h,w,c=image.shape
     face_num = 0
     for i in range(0, detections.shape[2]):
@@ -17,8 +21,16 @@ def show_detections(image,detections):
                 (0, 255,0), 1)
             cv2.putText(image, text, (startX, y),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
-    
-    face_num_str  =  'people:'  + str(face_num)
+
+    if face_num != face_num_global:
+        tack_photo_name = './/' + str(time.strftime('%c',time.localtime(time.time()))) + '.jpg'
+        tack_photo_name = tack_photo_name.replace(' ','_')
+        print(tack_photo_name)
+        cv2.imwrite(tack_photo_name,image)
+        face_num_global = face_num
+        
+      
+    face_num_str  =  'people:'  + str(face_num)  #脸数字符串
     cv2.putText(image,face_num_str,(int(image.shape[0]/10),int(image.shape[1]/10)),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),1)
             
     return image
