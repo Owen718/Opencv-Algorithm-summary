@@ -6,10 +6,9 @@ def cv_show(name,img):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-img = cv2.imread(r'C:\Users\Owen\Pictures\weixin1.jpg')
+img = cv2.imread(r'D:\github\Underwater-robot-competition\AUV_code\IPC\AUC_video_manager\screenshot.png')
 original = cv2.resize(img, None, fx=0.5, fy=0.5)
 
-img = cv2.cvtColor(original,cv2.COLOR_BGR2GRAY)
 
 def clahe_return(img):
     # 创建CLAHE对象
@@ -21,21 +20,18 @@ def clahe_return(img):
     # 分别显示原图，CLAHE，HE
     return dst
 
+def RGB_clahe(img):  #限制性直方图
+    b,g,r = cv2.split(img)
+    clahe = cv2.createCLAHE(clipLimit=2.0,tileGridSize=(8,8))
+    b = clahe.apply(b)
+    g = clahe.apply(g)
+    r = clahe.apply(r)
+
+    clahed = cv2.merge([b,g,r])
+    return clahed
 
 
-(b,g,r) = cv2.split(original)
-
-
-cv_show('b',b)
-cv_show('g',g)
-cv_show('r',r)
-
-
-bclahe = clahe_return(b)
-gclahe = clahe_return(g)
-rclahe = clahe_return(r)
-
-clahed = cv2.merge((bclahe,gclahe,rclahe))
+clahed = RGB_clahe(img)
 
 cv2.imshow("img", original)
 cv2.imshow("clahed", clahed)
